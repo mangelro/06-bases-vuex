@@ -1,0 +1,80 @@
+/*
+*   Fichero completo del counterStore
+*   Este se puede dividir en sus distintos componentes
+*   store
+*       \index.js
+        moduleA
+            \index.js    
+            \state.js
+            \mutations.js    
+            \actions.js  
+            \getters.js
+        moduleB        
+            \index.js    
+            \state.js
+            \mutations.js    
+            \actions.js  
+            \getters.js
+*/
+
+
+import getRndInt from '../../helpers/RandonInt'
+
+const counterStore= {
+    /*
+    * Evita conflictos entre los nombre de las propiedades.
+    * Si no se utiliza, el store hijo se incluye de manera global 
+    * en el padre, pudiendose producir conflictos entre los nombres
+    */
+    namespaced: true,
+    /*
+    * No puede, ni debe ser modificado directamente, solo a través de mutations
+    * Esta forma de definición como funcion que retorna un obj lo hace reactivo
+    */
+    state:()=>({
+        count:1,
+        lastMutation:'none',
+        isLoading:false
+    }),
+    /*
+    * Van a permitir modificar directamente el state - SÍNCRONAS
+    */
+    mutations:{
+        increment(state){
+            state.count++
+            state.lastMutation='increment'
+        },
+        incrementBy(state,val){
+            state.count+=val
+            state.lastMutation='incrementBy ' + val
+
+        },
+        setLoading(state,val){
+            state.isLoading=val
+            state.lastMutation='setLoading'
+        }
+    },
+    /*
+    * Pueden ser ASÍNCRONAS. Al recibir la repuesta disparan el commit
+    */
+    actions:{
+        //async incrementRndInt(context){
+        async incrementRndInt({commit}){
+            commit('setLoading',true)
+            const value=await getRndInt()
+            commit('incrementBy',value)
+            commit('setLoading',false)
+        }
+    },
+    /*
+    * Muy similares a la computed properties
+    */     
+    getters:{
+        squareCount(state) {
+            return Math.pow(state.count,2)
+        }
+    }
+
+}
+
+export default counterStore
